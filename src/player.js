@@ -17,8 +17,8 @@ Player.prototype.addScore = function(score) {
     this.frames.push(frame);
   }
 
-  // If we aren't on the last frame check the score for the frame won't be greater than 10
-  // if we are on the last frame, check that the score for any normal (non-bonus) rolls won't be greater than 10
+  // If not last frame, see if score for the frame won't be greater than 10
+  // if we in the final frame, see if score for any normal (non-bonus) rounds won't be greater than 10
   if((this.frames.length < 10 && (frame[0] || 0) + score <= 10) ||
     (this.frames.length == 10 && (frame[0] == 10 || (frame[0] || 0) + score <= 10 || frame[0] + frame[1] == 10))) {
     frame.push(score);
@@ -50,11 +50,11 @@ Player.prototype.getScore = function() {
       // Add the score for this round
       score += frame[j];
       if(i < (9) && j == 0 && frame[j] == 10 && frames[i + 1]) {
-        // Strike! Add the next two rolls as bonus points
+        // If there's a strike then add the next two rolls as extra points
         score += frames[i + 1][0] || 0;
         score += frames[i + 1][1] || (frames[i + 2] ? frames[i + 2][0] : 0);
       } else if(j == 1 && (frame[0] + frame[1]) == 10 && frames[i + 1]) {
-        // Spare! Add the next roll as bonus points
+        // If there's a spare, add the next round as extra points
         score += frames[i + 1][0] || 0;
       }
 	  
@@ -79,10 +79,9 @@ Player.prototype.getRollInFrame = function() {
 
 Player.prototype.isFrameOver = function() {
   var frame = this.frames[this.frames.length - 1];
-  // The frame is over if 
-  //   there is no frame (helpful in the addScore method)
-  //   we aren't in the last frame and there have been two rolls OR the first roll was a strike
-  //   we are in the last frame and there have been three rolls OR the first two rolls scored less than 10
+  // The frame is over if there is no frame (this is helpful in the addScore method)  
+  // when not the last frame and there have been two rounds OR the first round was a strike
+  // we are in the last frame and there have been three rounds OR the first two rounds scored less than 10
   return !frame || (this.frames.length < 10 && (frame.length == 2 || frame[0] == 10)) || (this.frames.length == 10 && (frame.length == 3 || frame[0] + frame[1] < 10));
 }
 
