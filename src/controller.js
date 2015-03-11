@@ -1,97 +1,90 @@
-function Controller() {
-  // This creates an array of player objects
-  this.players = [];
-  this.currentPlayer = 0;
-  this.rollInFrame = 0;
+
+
+function Player(name) {
+  this.name = name;
+  this.frames = [];
 }
 
-Controller.prototype.addPlayer = function(name) {
-  // Ensure provided player name is not empty
-  if(name && name != '' && !name.match(/^ *$/)) {
-    // Ensure no more than 6 players are entered. 
-    if(this.players.length < 6) {
-      // This instantiates a new Player (bowler) object
-      this.players.push(new Player(name));
-      return true;
-    } else {
-      return false;
-    }
+Player.prototype.addScore = function(score) {
+  if(this.isGameOver())
+    return false;
+
+  var frame = this.frames[this.frames.length - 1];
+
+  // If required, new frame is created and added to array
+  if(this.isFrameOver()) {
+    frame = [];
+    this.frames.push(frame);
   }
-}
 
-Controller.prototype.getPlayers = function() {
-  return this.players.map(function(e) { return e.name; });
-}
-
-Controller.prototype.getScores = function(player) {
-  return this.players[player].getRolls();
-}
-
-Controller.prototype.getFrames = function(player) {
-  return this.players[player].getFrames();
-}
-
-Controller.prototype.addScore = function(score) {
-  // Retrieve score value as an integer
-  var scoreVal = parseInt(score);
-
-  var player = this.players[this.currentPlayer];
-
-  // Ensure score is between 0 & 10
-  if(scoreVal >= 0 && scoreVal <= 10) {
-
-    // Add score
-    if(!player.addScore(scoreVal))
-      return false;
-
-    // End of Frame? Then move to next player
-    if(player.isFrameOver()) {
-      this.currentPlayer++;
-      if(this.currentPlayer >= this.players.length) {
-        this.currentPlayer = 0; 
-      }
-    }
-
+  // If not last frame, see if score for the frame won't be greater than 10
+  // if we in the final frame, see if score for any normal (non-bonus) rounds won't be greater than 10
+  if((this.frames.length < 10 && (frame[0] || 0) + score <= 10) ||
+    (this.frames.length == 10 && (frame[0] == 10 || (frame[0] || 0) + score <= 10 || frame[0] + frame[1] == 10))) {
+    frame.push(score);
     return true;
   } else {
     return false;
   }
 }
 
-
-
-Controller.prototype.getTotal = function(player) {
-  // Returns score of the provided player
-  return this.players[player].getScore();
+Player.prototype.getFrames = function() {
+  return this.frames;
 }
 
-Controller.prototype.getCurrentPlayer = function() {
-  // Returns index of the provided player
-  return this.currentPlayer;
+Player.prototype.getRolls = function() {
+  var rolls = [];
+  rolls = rolls.concat.apply(rolls, this.frames);
+  return rolls;
 }
 
-Controller.prototype.getCurrentRoll = function() {
-  // Returns index of current roll (next roll to be made) of the provided player
-  return this.players[this.currentPlayer].getRolls().length;
+Player.prototype.getScore = function() {
+  var score = 0;
+
+  var frames = this.getFrames();
+
+  for(var i = 0; i < frames.length; i++) {
+    var frame = frames[i];
+
+    for(var j = 0; j < frame.length; j++) {
+      // Add the score for this round
+      score += frame[j];
+      if(i < (9) && j == 0 && frame[j] == 10 && frames[i + 1]) {
+        // If there's a strike then add the next two rolls as extra points
+        score += frames[i + 1][0] || 0;
+        score += frames[i + 1][1] || (frames[i + 2] ? frames[i + 2][0] : 0);
+      } else if(j == 1 && (frame[0] + frame[1]) == 10 && frames[i + 1]) {
+        // If there's a spare, add the next round as extra points
+        score += frames[i + 1][0] || 0;
+      }
+	  
+	  
+    }
+  }
+
+  return score;
 }
 
-Controller.prototype.isGameOver = function() {
-  // Ensure last player has finished
-  return this.players[this.players.length - 1].isGameOver();
+Player.prototype.showError = function(errorMessage) {
+  // Show the error box and display the given message
+  var error = document.querySelector('#error');
+  error.innerHTML = errorMessage;
+  error.style.visibility = 'initial';
 }
 
-Controller.prototype.getWinner = function() {
-  // When the game isn't finished we don't have a winner
-  if(!this.isGameOver())
-    return false;
+Player.prototype.getRollInFrame = function() {
+  // If we have some frames, return the length of the last frame, otherwise return 0
+  return this.frames[0] ? this.frames[this.frames.length - 1].length : 0;
+}
 
-  var winner;
+Player.prototype.isFrameOver = function() {
+  var frame = this.frames[this.frames.length - 1];
+  // The frame is over if there is no frame (this is helpful in the addScore method)  
+  // when not the last frame and there have been two rounds OR the first round was a strike
+  // we are in the last frame and there have been three rounds OR the first two rounds scored less than 10
+  return !frame || (this.frames.length < 10 && (frame.length == 2 || frame[0] == 10)) || (this.frames.length == 10 && (frame.length == 3 || frame[0] + frame[1] < 10));
+}
 
-  // Search for bowler with highest score
-  this.players.forEach(function(player) {
-    if(!(winner && winner.getScore() > player.getScore()))
-      winner = player;
-    })
-
-  return winner.name;
+Player.prototype.isGameOver = function() {
+  return this.frames.length == 10 && this.isFrameOver();
 }
