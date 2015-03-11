@@ -1,16 +1,16 @@
 function Controller() {
-  // Create an array to hold our player objects
+  // This creates an array of player objects
   this.players = [];
   this.currentPlayer = 0;
   this.rollInFrame = 0;
 }
 
 Controller.prototype.addPlayer = function(name) {
-  // Check the player name isn't empty
+  // Ensure provided player name is not empty
   if(name && name != '' && !name.match(/^ *$/)) {
-    // Check we're not trying to add more than 6 players
+    // Ensure no more than 6 players are entered. 
     if(this.players.length < 6) {
-      // Instantiate a new Player object
+      // This instantiates a new Player (bowler) object
       this.players.push(new Player(name));
       return true;
     } else {
@@ -32,19 +32,19 @@ Controller.prototype.getFrames = function(player) {
 }
 
 Controller.prototype.addScore = function(score) {
-  // Get integer value of score
+  // Retrieve score value as an integer
   var scoreVal = parseInt(score);
 
   var player = this.players[this.currentPlayer];
 
-  // Check the score is between 0 and 10
+  // Ensure score is between 0 & 10
   if(scoreVal >= 0 && scoreVal <= 10) {
 
     // Add score
     if(!player.addScore(scoreVal))
       return false;
 
-    // If that's the end of the frame move to the next player
+    // End of Frame? Then move to next player
     if(player.isFrameOver()) {
       this.currentPlayer++;
       if(this.currentPlayer >= this.players.length) {
@@ -61,33 +61,33 @@ Controller.prototype.addScore = function(score) {
 
 
 Controller.prototype.getTotal = function(player) {
-  // Return the score of the given player
+  // Returns score of the provided player
   return this.players[player].getScore();
 }
 
 Controller.prototype.getCurrentPlayer = function() {
-  // Return the index of the current player
+  // Returns index of the provided player
   return this.currentPlayer;
 }
 
 Controller.prototype.getCurrentRoll = function() {
-  // Return the index of the current roll (next roll to be made) of the current player
+  // Returns index of current roll (next roll to be made) of the provided player
   return this.players[this.currentPlayer].getRolls().length;
 }
 
 Controller.prototype.isGameOver = function() {
-  // Check whether the last player has finished
+  // Ensure last player has finished
   return this.players[this.players.length - 1].isGameOver();
 }
 
 Controller.prototype.getWinner = function() {
-  // If the game isn't over we don't have a winner
+  // When the game isn't finished we don't have a winner
   if(!this.isGameOver())
     return false;
 
   var winner;
 
-  // Find the player with the highest score
+  // Search for bowler with highest score
   this.players.forEach(function(player) {
     if(!(winner && winner.getScore() > player.getScore()))
       winner = player;
