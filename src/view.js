@@ -2,7 +2,7 @@
   var MAX_PLAYERS = 6;
 
 function View() {
-  // Bind DOM element events to methods
+  // Here binds Document Object Model element events to methods
 
   // Add player
   
@@ -42,7 +42,7 @@ View.prototype.addPlayer = function() {
       document.getElementById('player-name-input').value = '';
       document.view.updateBoard();
     } else {
-      // Failure! Show an error
+      // Failure! Show an error based on incorrect input 
       this.showError('You have exceeded the maximum number of players which is ' + MAX_PLAYERS + ', please enter a number of players less than ' + MAX_PLAYERS + '.');
     }
   } else {
@@ -53,7 +53,7 @@ View.prototype.addPlayer = function() {
 View.prototype.startGame = function() {
   // Check we have some players   
   if(document.controller.getPlayers().length > 0) {
-    // Hide the 'add players' interface and show the score input 
+    // This hides the 'add players' interface and show the score input 
     document.querySelector('#add-players').style.display = 'none';
     document.querySelector('#score').style.display = 'initial';
     document.querySelector('#score-input').focus();
@@ -72,13 +72,13 @@ View.prototype.checkScore = function(){
 View.prototype.addScore = function() {
   var score = 0;
   score = document.querySelector('#score-input').value;
-  //it's all here somewhere, use function above???
+  
   
   
   // Check the input isn't empty
   if(score != '') {
     if(document.controller.addScore.bind(document.controller)(document.querySelector('#score-input').value)) {      
-      // Success! Hide any errors being shown, blank the input and update the board
+      // Hide any errors being shown, blank the input and update the board
       this.hideError();
       document.querySelector('#score-input').value = '';
       document.view.updateBoard();
@@ -91,7 +91,7 @@ View.prototype.addScore = function() {
 	
 	else {
       // Failure! Show an error
-	  //var frames = document.player.getFrames();
+	  
       this.showError('<strong>Sorry!</strong> That score is invalid. Please enter a number between 1 and '+MAX_POSSIBLE+'.');
     }
   }
